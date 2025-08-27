@@ -562,7 +562,7 @@
                     <div className="glass-card rounded-2xl p-8 w-full max-w-md text-center animate-fade-in relative z-10">
                         <div className="mb-10">
                             <div className="w-20 h-20 bg-gradient-to-br from-primary-500 via-primary-400 to-secondary-500 rounded-2xl mx-auto mb-6 flex items-center justify-center pulse-glow float overflow-hidden">
-                                <img src="/icons/icon-192.png" alt="App icon" className="w-12 h-12" />
+                                <img src="./icons/icon-192.png" alt="App icon" className="w-12 h-12" />
                             </div>
                             <h1 className="text-3xl font-bold gradient-text mb-3">Expense Tracker</h1>
                             <p className="text-dark-muted text-lg">Your smart financial companion</p>
@@ -888,9 +888,9 @@
             
             return (
                 <div className="min-h-screen bg-dark-bg pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
-                    <Header
-                        title="Expense Tracker"
-                        actions={
+                    {/* Hero Balance Card */}
+                    <div className="p-6">
+                        <div className="flex justify-end mt-4 mb-2">
                             <button
                                 onClick={signOut}
                                 className="text-sm glass-card hover:bg-glass-bg text-white font-medium py-2 px-3 rounded-xl transition-all flex items-center gap-2"
@@ -900,11 +900,7 @@
                                 </svg>
                                 Sign out
                             </button>
-                        }
-                    />
-                    
-                    {/* Hero Balance Card */}
-                    <div className="p-6">
+                        </div>
                         <div className="relative overflow-hidden">
                             {/* Background gradient orbs */}
                             <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary-500 rounded-full opacity-30 blur-2xl"></div>
