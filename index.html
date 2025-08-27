@@ -116,6 +116,13 @@
     
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module">
+        // Expose Vite env vars to the window for inline scripts
+        window.__ENV__ = {
+            SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
+            SUPABASE_ANON_KEY: import.meta.env.VITE_SUPABASE_ANON_KEY,
+        };
+    </script>
     
     <style>
         /* Import SF Pro Display font */
@@ -441,12 +448,12 @@
     <script type="text/babel">
         const { useState, useEffect, createContext, useContext } = React;
         
-        // Configuration - Replace with your Supabase credentials
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        // Configuration - read from Vite-provided env (set in .env.local)
+        const SUPABASE_URL = (window.__ENV__ && window.__ENV__.SUPABASE_URL) || '';
+        const SUPABASE_ANON_KEY = (window.__ENV__ && window.__ENV__.SUPABASE_ANON_KEY) || '';
         
-        // Demo mode check
-        const DEMO_MODE = SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY';
+        // Demo mode check - temporarily enabled for testing
+        const DEMO_MODE = false; // SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY';
         
         // Initialize Supabase client (only if not in demo mode)
         const supabase = DEMO_MODE ? null : window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -618,75 +625,6 @@
                 </div>
             </header>
         );
-        
-        // Category icon mapping
-        const getCategoryIcon = (description) => {
-            const desc = description.toLowerCase();
-            if (desc.includes('grocery') || desc.includes('food') || desc.includes('restaurant') || desc.includes('lunch') || desc.includes('dinner')) {
-                return { icon: '🍽️', color: 'bg-accent-orange' };
-            } else if (desc.includes('coffee') || desc.includes('cafe') || desc.includes('starbucks')) {
-                return { icon: '☕', color: 'bg-amber-500' };
-            } else if (desc.includes('gas') || desc.includes('fuel') || desc.includes('petrol')) {
-                return { icon: '⛽', color: 'bg-accent-blue' };
-            } else if (desc.includes('transport') || desc.includes('uber') || desc.includes('taxi') || desc.includes('bus')) {
-                return { icon: '🚗', color: 'bg-accent-green' };
-            } else if (desc.includes('shopping') || desc.includes('clothes') || desc.includes('amazon')) {
-                return { icon: '🛍️', color: 'bg-accent-pink' };
-            } else if (desc.includes('entertainment') || desc.includes('movie') || desc.includes('netflix')) {
-                return { icon: '🎬', color: 'bg-accent-purple' };
-            } else {
-                return { icon: '💳', color: 'bg-dark-muted' };
-            }
-        };
-
-        // Data Visualization Component
-        const SpendingChart = ({ transactions }) => {
-            const categoryData = transactions.reduce((acc, transaction) => {
-                const categoryInfo = getCategoryIcon(transaction.description);
-                const category = categoryInfo.icon;
-                acc[category] = (acc[category] || 0) + parseFloat(transaction.amount);
-                return acc;
-            }, {});
-            
-            const total = Object.values(categoryData).reduce((sum, amount) => sum + amount, 0);
-            const categories = Object.entries(categoryData)
-                .sort(([,a], [,b]) => b - a)
-                .slice(0, 5); // Top 5 categories
-            
-            return (
-                <div className="glass-card rounded-2xl p-6 mb-6 animate-fade-in">
-                    <h3 className="text-lg font-semibold mb-4 gradient-text">Spending Breakdown</h3>
-                    <div className="space-y-3">
-                        {categories.map(([category, amount], index) => {
-                            const percentage = (amount / total) * 100;
-                            const colors = ['bg-accent-purple', 'bg-accent-green', 'bg-accent-blue', 'bg-accent-pink', 'bg-accent-orange'];
-                            
-                            return (
-                                <div key={category} className="flex items-center gap-4">
-                                    <div className="text-2xl">{category}</div>
-                                    <div className="flex-1">
-                                        <div className="flex justify-between items-center mb-1">
-                                            <span className="text-sm text-dark-muted">
-                                                {formatCurrency(amount)}
-                                            </span>
-                                            <span className="text-xs text-dark-muted">
-                                                {percentage.toFixed(1)}%
-                                            </span>
-                                        </div>
-                                        <div className="w-full bg-dark-card rounded-full h-2">
-                                            <div 
-                                                className={`${colors[index]} h-2 rounded-full transition-all duration-1000 ease-out`}
-                                                style={{ width: `${percentage}%` }}
-                                            ></div>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            );
-        };
 
         const TransactionItem = ({ transaction, onEdit, onDelete }) => {
             return (
