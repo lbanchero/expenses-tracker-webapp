@@ -169,7 +169,7 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            box-shadow: none;
         }
         
         /* Safe area support for iOS notch */
@@ -233,13 +233,13 @@
         
         /* Card hover effects */
         .card-hover {
-            transform: translateY(0);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: none;
+            transition: none;
         }
         
         .card-hover:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 20px 40px 0 rgba(0, 0, 0, 0.5);
+            transform: none;
+            box-shadow: none;
         }
         
         /* Gradient text */
@@ -562,7 +562,7 @@
                     <div className="glass-card rounded-2xl p-8 w-full max-w-md text-center animate-fade-in relative z-10">
                         <div className="mb-10">
                             <div className="w-20 h-20 bg-gradient-to-br from-primary-500 via-primary-400 to-secondary-500 rounded-2xl mx-auto mb-6 flex items-center justify-center pulse-glow float overflow-hidden">
-                                <img src="./icons/icon-192.png" alt="App icon" className="w-12 h-12" />
+                                <img src={new URL('./icons/icon-192.png', window.location.origin).toString()} alt="App icon" className="w-12 h-12" onError={(e)=>{e.currentTarget.style.display='none';}} />
                             </div>
                             <h1 className="text-3xl font-bold gradient-text mb-3">Expense Tracker</h1>
                             <p className="text-dark-muted text-lg">Your smart financial companion</p>
@@ -890,7 +890,7 @@
                 <div className="min-h-screen bg-dark-bg pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
                     {/* Hero Balance Card */}
                     <div className="p-6">
-                        <div className="flex justify-end mt-4 mb-2">
+                        <div className="flex justify-end">
                             <button
                                 onClick={signOut}
                                 className="text-sm glass-card hover:bg-glass-bg text-white font-medium py-2 px-3 rounded-xl transition-all flex items-center gap-2"
