@@ -2,11 +2,15 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Expense Tracker</title>
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#8B5CF6">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="application-name" content="Expense Tracker">
+    <meta name="msapplication-TileColor" content="#1F2937">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Expense Tracker">
@@ -15,8 +19,10 @@
     <link rel="manifest" href="./manifest.json">
     
     <!-- Icons -->
+    <link rel="icon" href="./icons/favicon.ico" sizes="16x16 32x32" type="image/x-icon">
     <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
-    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="./icons/icon-512.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -166,6 +172,12 @@
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        
+        /* Safe area support for iOS notch */
+        .safe-area-pad {
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
         }
         
         /* Enhanced scrollbar */
@@ -452,11 +464,8 @@
         const SUPABASE_URL = (window.__ENV__ && window.__ENV__.SUPABASE_URL) || '';
         const SUPABASE_ANON_KEY = (window.__ENV__ && window.__ENV__.SUPABASE_ANON_KEY) || '';
         
-        // Demo mode check - temporarily enabled for testing
-        const DEMO_MODE = false; // SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_ANON_KEY === 'YOUR_SUPABASE_ANON_KEY';
-        
-        // Initialize Supabase client (only if not in demo mode)
-        const supabase = DEMO_MODE ? null : window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         // Auth Context
         const AuthContext = createContext();
@@ -466,19 +475,6 @@
             const [loading, setLoading] = useState(true);
             
             useEffect(() => {
-                if (DEMO_MODE) {
-                    // Demo mode - simulate logged in user
-                    setTimeout(() => {
-                        setUser({ 
-                            id: 'demo-user', 
-                            email: 'demo@example.com',
-                            name: 'Demo User'
-                        });
-                        setLoading(false);
-                    }, 1000);
-                    return;
-                }
-                
                 // Get initial session
                 supabase.auth.getSession().then(({ data: { session } }) => {
                     setUser(session?.user ?? null);
@@ -497,11 +493,6 @@
             }, []);
             
             const signInWithGoogle = async () => {
-                if (DEMO_MODE) {
-                    alert('Demo Mode: In production, this would sign you in with Google. Please configure Supabase credentials to enable authentication.');
-                    return;
-                }
-                
                 const { error } = await supabase.auth.signInWithOAuth({
                     provider: 'google',
                     options: {
@@ -512,11 +503,6 @@
             };
             
             const signOut = async () => {
-                if (DEMO_MODE) {
-                    setUser(null);
-                    return;
-                }
-                
                 const { error } = await supabase.auth.signOut();
                 if (error) console.error('Error signing out:', error);
             };
@@ -619,7 +605,7 @@
                                 </svg>
                             </button>
                         )}
-                        <h1 className="text-xl font-semibold text-dark-text">{title}</h1>
+                        <img src="./icons/icon-192.png" alt="Expense Tracker" className="w-6 h-6 rounded-lg" />
                     </div>
                     {actions && <div className="flex items-center gap-2">{actions}</div>}
                 </div>
@@ -822,39 +808,6 @@
             
             const loadTransactions = async () => {
                 try {
-                    if (DEMO_MODE) {
-                        // Demo data
-                        const demoTransactions = [
-                            {
-                                id: '1',
-                                description: 'Grocery Shopping',
-                                amount: 45.67,
-                                transaction_date: new Date().toISOString().split('T')[0],
-                                created_at: new Date().toISOString()
-                            },
-                            {
-                                id: '2',
-                                description: 'Coffee',
-                                amount: 4.50,
-                                transaction_date: new Date(Date.now() - 86400000).toISOString().split('T')[0],
-                                created_at: new Date(Date.now() - 86400000).toISOString()
-                            },
-                            {
-                                id: '3',
-                                description: 'Gas Station',
-                                amount: 52.30,
-                                transaction_date: new Date(Date.now() - 172800000).toISOString().split('T')[0],
-                                created_at: new Date(Date.now() - 172800000).toISOString()
-                            }
-                        ];
-                        
-                        setTransactions(demoTransactions);
-                        const total = demoTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
-                        setMonthlyTotal(total);
-                        setLoading(false);
-                        return;
-                    }
-                    
                     const { start, end } = getCurrentMonthRange();
                     const { data, error } = await supabase
                         .from('transactions')
@@ -883,26 +836,9 @@
             
             const handleAddExpense = async (expenseData) => {
                 try {
-                    if (DEMO_MODE) {
-                        // Demo mode - simulate adding expense
-                        const newTransaction = {
-                            id: Date.now().toString(),
-                            ...expenseData,
-                            user_id: user.id,
-                            created_at: new Date().toISOString()
-                        };
-                        setTransactions(prev => [newTransaction, ...prev]);
-                        setMonthlyTotal(prev => prev + parseFloat(expenseData.amount));
-                        setShowForm(false);
-                        return;
-                    }
-                    
                     const { error } = await supabase
                         .from('transactions')
-                        .insert([{
-                            ...expenseData,
-                            user_id: user.id
-                        }]);
+                        .insert([{ ...expenseData, user_id: user.id }]);
                     
                     if (error) throw error;
                     
@@ -916,25 +852,6 @@
             
             const handleEditExpense = async (expenseData) => {
                 try {
-                    if (DEMO_MODE) {
-                        // Demo mode - simulate editing expense
-                        setTransactions(prev => prev.map(t => 
-                            t.id === editingTransaction.id 
-                                ? { ...t, ...expenseData }
-                                : t
-                        ));
-                        // Recalculate total
-                        const newTransactions = transactions.map(t => 
-                            t.id === editingTransaction.id 
-                                ? { ...t, ...expenseData }
-                                : t
-                        );
-                        const total = newTransactions.reduce((sum, t) => sum + parseFloat(t.amount), 0);
-                        setMonthlyTotal(total);
-                        setEditingTransaction(null);
-                        return;
-                    }
-                    
                     const { error } = await supabase
                         .from('transactions')
                         .update(expenseData)
@@ -954,14 +871,6 @@
                 if (!confirm('Are you sure you want to delete this expense?')) return;
                 
                 try {
-                    if (DEMO_MODE) {
-                        // Demo mode - simulate deleting expense
-                        const transactionToDelete = transactions.find(t => t.id === id);
-                        setTransactions(prev => prev.filter(t => t.id !== id));
-                        setMonthlyTotal(prev => prev - parseFloat(transactionToDelete.amount));
-                        return;
-                    }
-                    
                     const { error } = await supabase
                         .from('transactions')
                         .delete()
