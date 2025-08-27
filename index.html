@@ -171,6 +171,17 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: none;
         }
+        /* Hero card specific transitions and shadow */
+        .hero-card {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+            overflow: visible;
+        }
+
+        .hero-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+        }
         
         /* Safe area support for iOS notch */
         .safe-area-pad {
@@ -501,8 +512,17 @@
             };
             
             const signOut = async () => {
-                const { error } = await supabase.auth.signOut();
-                if (error) console.error('Error signing out:', error);
+                try {
+                    const { error } = await supabase.auth.signOut();
+                    if (error) throw error;
+                } catch (err) {
+                    console.error('Error signing out:', err);
+                } finally {
+                    setUser(null);
+                    // Ensure full UI reset on mobile/PWA
+                    const target = window.location.origin + window.location.pathname;
+                    window.location.replace(target);
+                }
             };
             
             return (
@@ -890,7 +910,7 @@
                 <div className="min-h-screen bg-dark-bg pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
                     {/* Hero Balance Card */}
                     <div className="p-6">
-                        <div className="flex justify-end">
+                        <div className="flex justify-end mb-4">
                             <button
                                 onClick={signOut}
                                 className="text-sm glass-card hover:bg-glass-bg text-white font-medium py-2 px-3 rounded-xl transition-all flex items-center gap-2"
@@ -901,12 +921,12 @@
                                 Sign out
                             </button>
                         </div>
-                        <div className="relative overflow-hidden">
+                        <div className="relative overflow-visible">
                             {/* Background gradient orbs */}
                             <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary-500 rounded-full opacity-30 blur-2xl"></div>
                             <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-secondary-500 rounded-full opacity-20 blur-2xl"></div>
                             
-                            <div className="glass-card rounded-3xl p-8 mb-8 card-hover relative z-10 animate-fade-in">
+                            <div className="glass-card hero-card rounded-3xl p-8 mb-8 relative z-10 animate-fade-in">
                                 <div className="flex items-center justify-between mb-6">
                                     <div>
                                         <p className="text-dark-muted text-sm font-medium mb-1">Total Spent</p>
